@@ -251,21 +251,21 @@ var GraphicsDefinition = (function () {
       // tha the Flash player starts and stops the pen
       // at 'D', so we will too.
 
-      this._currentPath.moveTo(x+w, y+h-radiusH);
-      this._currentPath.arcTo(x+w, y+h, x+w-radiusW, y+h-radiusH, radiusW, radiusH);
-      this._currentPath.arcTo(x, y+h, x, y+h-radiusH, radiusW, radiusH);
-      this._currentPath.arcTo(x, y, x+radiusW, y, radiusW, radiusH);
-      this._currentPath.arcTo(x+w, y, x+w, y+radiusH, radiusW, radiusH);
+      this._currentPath.moveTo(x + w, y + h - radiusH);
+      this._currentPath.arcTo(x + w, y + h, x + w - radiusW, y + h - radiusH, radiusW, radiusH);
+      this._currentPath.arcTo(x, y + h, x, y + h - radiusH, radiusW, radiusH);
+      this._currentPath.arcTo(x, y, x + radiusW, y, radiusW, radiusH);
+      this._currentPath.arcTo(x + w, y, x + w, y + radiusH, radiusW, radiusH);
     },
     drawRoundRectComplex: function (x, y, w, h, topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius) {
       if (isNaN(w + h + topLeftRadius + topRightRadius + bottomLeftRadius + bottomRightRadius))
         throw ArgumentError();
 
-      this._currentPath.moveTo(x+w, y+h-radiusH);
-      this._currentPath.arcTo(x+w, y+h, x+w-bottomRightRadius, y+h-bottomRightRadius, bottomRightRadius);
-      this._currentPath.arcTo(x, y+h, x, y+h-bottomLeftRadius, bottomLeftRadius);
-      this._currentPath.arcTo(x, y, x+topLeftRadius, y, topLeftRadius);
-      this._currentPath.arcTo(x+w, y, x+w, y+topRightRadius, topRightRadius);
+      this._currentPath.moveTo(x + w, y + h - radiusH);
+      this._currentPath.arcTo(x + w, y + h, x + w - bottomRightRadius, y + h - bottomRightRadius, bottomRightRadius);
+      this._currentPath.arcTo(x, y + h, x, y + h - bottomLeftRadius, bottomLeftRadius);
+      this._currentPath.arcTo(x, y, x + topLeftRadius, y, topLeftRadius);
+      this._currentPath.arcTo(x + w, y, x + w, y + topRightRadius, topRightRadius);
     },
     drawTriangles: function (vertices, indices, uvtData, culling) {
       notImplemented();

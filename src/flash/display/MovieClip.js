@@ -34,6 +34,42 @@ var MovieClipDefinition = (function () {
           scripts[i].call(this);
       }
     },
+    _constructSymbol: function(symbolId, name) {
+      var loader = this.loaderInfo._loader;
+      var symbolPromise = loader._dictionary[symbolId];
+      var symbolInfo = symbolPromise.value;
+      // HACK application domain may have the symbol class --
+      // checking which domain has a symbol class
+      var symbolClass = avm2.systemDomain.findClass(symbolInfo.className) ?
+        avm2.systemDomain.getClass(symbolInfo.className) :
+        avm2.applicationDomain.getClass(symbolInfo.className);
+      var instance = symbolClass.createAsSymbol(symbolInfo.props);
+
+      // If we bound the instance to a name, set it.
+      //
+      // XXX: I think this always has to be a trait.
+      if (name)
+        this[Multiname.getPublicQualifiedName(name)] = instance;
+
+      // Call the constructor now that we've made the symbol instance,
+      // instantiated all its children, and set the display list-specific
+      // properties.
+      //
+      // XXX: I think we're supposed to throw if the symbol class
+      // constructor is not nullary.
+      symbolClass.instance.call(instance);
+
+      instance._markAsDirty();
+
+      instance._animated = true;
+      instance._owned = true;
+      instance._parent = this;
+      instance._name = name || null;
+
+      instance.dispatchEvent(new flash.events.Event("load"));
+
+      return instance;
+    },
     _getAS2Object: function () {
       if (!this.$as2Object) {
         new AS2MovieClip().$attachNativeObject(this);
@@ -73,44 +109,6 @@ var MovieClipDefinition = (function () {
 
       instance.dispatchEvent(new flash.events.Event("added"));
     },
-
-    _constructSymbol: function(symbolId, name) {
-      var loader = this.loaderInfo._loader;
-      var symbolPromise = loader._dictionary[symbolId];
-      var symbolInfo = symbolPromise.value;
-      // HACK application domain may have the symbol class --
-      // checking which domain has a symbol class
-      var symbolClass = avm2.systemDomain.findClass(symbolInfo.className) ?
-        avm2.systemDomain.getClass(symbolInfo.className) :
-        avm2.applicationDomain.getClass(symbolInfo.className);
-      var instance = symbolClass.createAsSymbol(symbolInfo.props);
-
-      // If we bound the instance to a name, set it.
-      //
-      // XXX: I think this always has to be a trait.
-      if (name)
-        this[Multiname.getPublicQualifiedName(name)] = instance;
-
-      // Call the constructor now that we've made the symbol instance,
-      // instantiated all its children, and set the display list-specific
-      // properties.
-      //
-      // XXX: I think we're supposed to throw if the symbol class
-      // constructor is not nullary.
-      symbolClass.instance.call(instance);
-
-      instance._markAsDirty();
-
-      instance._animated = true;
-      instance._owned = true;
-      instance._parent = this;
-      instance._name = name || null;
-
-      instance.dispatchEvent(new flash.events.Event("load"));
-
-      return instance;
-    },
-
     _gotoFrame: function (frameNum, scene) {
       if (frameNum > this._totalFrames)
         frameNum = 1;
@@ -210,10 +208,6 @@ var MovieClipDefinition = (function () {
       this._currentFrame = frameNum;
       this._requestCallFrame();
     },
-    _requestCallFrame: function () {
-       this._scriptExecutionPending = true;
-       this.stage._callFrameRequested = true;
-    },
     _initAvm1Bindings: function (instance, name, events) {
       var loader = this.loaderInfo._loader;
       var avm1Context = loader._avm1Context;
@@ -284,6 +278,10 @@ var MovieClipDefinition = (function () {
       if (name) {
         this._getAS2Object()[name] = instance._getAS2Object();
       }
+    },
+    _requestCallFrame: function () {
+       this._scriptExecutionPending = true;
+       this.stage._callFrameRequested = true;
     },
 
     get currentFrame() {
